@@ -1,8 +1,7 @@
-// import { Router } from "express";
-// import AuthController from "../controllers/get-notif.controller";
+import { Router } from "express";
+import * as authController from "../controller/auth.controller";
 
-// const userRouter = Router();
+const userRouter = Router();
+userRouter.post("/login", authController.login);
 
-// userRouter.post("/register", AuthController.register);
-
-// export default userRouter;
+export { userRouter };
