@@ -11,7 +11,7 @@ export class CustomerClientService extends RpcRequestServiceAbstract {
   constructor() {
     super();
     // Define the path to the proto file
-    this.serviceHost = process.env.CUSTOMER_RPC_HOST || '0.0.0.0:5000';
+    this.serviceHost = '0.0.0.0:5001';
     this.serviceProtoPath = path.join(process.cwd(), '../ecom-protos-grpc/customer/customer.proto');
     // Load the proto file
     const customerPackageDefinition = ProtoLoader.loadSync(this.serviceProtoPath);

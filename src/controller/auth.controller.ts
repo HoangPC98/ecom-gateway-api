@@ -2,53 +2,34 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { CustomerClientService } from '../services/rpc_client_services/rpc-client-customer';
-import { ICustomerAuth } from 'src/interfaces/customer-service/auth.interface';
+import { ICustomerAuth, SessionLogin, IGetOtpReq } from '../interfaces/customer-service/auth.interface';
+import { v1 as uuidv1 } from 'uuid';
+import { AuthService } from '../services/auth.service';
+import { plainToClass, plainToInstance } from 'class-transformer';
 
 const accessTokenSecret = process.env.JWT_ATOKEN || 'access';
 const refreshTokenSecret = process.env.JWT_RTOKEN || 'refresh';
 const customerClientService = new CustomerClientService();
+const authService = new AuthService();
 
-export const login = (req: Request, res: Response) => {
- 
-  console.log('this.customerClientService', this);
-  console.log('thisaccessTokenSecret', accessTokenSecret);
-  const listUser = [
-    { id: 1, username: 'admin', password: bcrypt.hashSync('admin', 10), role: 'admin' },
-    { id: 2, username: 'user', password: bcrypt.hashSync('user', 10), role: 'user' },
-  ];
-
-  // console.log('thisUsers', this.users);
-  // console.log('this.customerClientService', this.customerClientService);
-  // const user = listUser.find(user => user.username === username);
-  // if (!user) {
-  //   res.status(400).send('Invalid username or password');
-  //   return;
-  // }
-
-  // const customerClientService = new CustomerClientService();
-  // const validPassword = bcrypt.compareSync(password, user.password);
-  // if (!validPassword) {
-  //   res.status(400).send('Invalid username or password');
-  //   return;
-  // }
-
-  // const accessToken = this.generateAccessToken({ id: user.id, role: user.role });
-  // const refreshToken = this.generateRefreshToken({ id: user.id, role: user.role });
-  customerClientService.clientRequest({ method: 'login', message: { usr: 'hoangpc', password: '123' } }, (err: any, data: any) => {
+export const login =  async (req: Request, res: Response) => {
+  customerClientService.clientRequest({ method: 'login', message: { usr: 'hoangpc', password: '123' } }, async (err: any, data: any) => {
     console.log('GET clientRequest', data, err)
     if (err) {
       console.log('Error', err);
     }
-    console.log('Data...', data)
-    res.json({ users: data });
+    console.log('Data...', data);
+   
+    console.log('header...', req.headers['x-forwarded-for']);
+    console.log('ipa..', req.socket.remoteAddress)
+    const tokens = await authService.handleLogin(data, req)
+    res.status(201).json({ data: tokens });
   });
 }
 
-
-const generateAccessToken = (user: ICustomerAuth): string => {
-  return jwt.sign(user, accessTokenSecret, { expiresIn: '15m' });
+export const getOtp = async(req: Request, res: Response) => {
+  const pl: IGetOtpReq = req.body;
+  const result = await authService.sendOtp(pl.usr, pl.type);
+  res.status(200).json(result);
 }
 
-const generateRefreshToken = (user: ICustomerAuth): string => {
-  return jwt.sign(user, refreshTokenSecret, { expiresIn: '7d' });
-}

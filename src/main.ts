@@ -1,6 +1,6 @@
 import express, { Express } from "express";
 import { Server } from "http";
-import { userRouter } from "./routes/authRoutes";
+import { authRoute } from "./routes/authRoutes";
 import { errorConverter, errorHandler } from "./middleware/exception.middleware";
 import config from "./config/app.config";
 import * as grpc from '@grpc/grpc-js';
@@ -13,7 +13,7 @@ const restServer: Express = express();
 function startServer() {
   restServer.use(express.json());
   restServer.use(express.urlencoded({ extended: true }));
-  restServer.use(userRouter);
+  restServer.use(authRoute);
   restServer.use(errorConverter);
   restServer.use(errorHandler);
   server = restServer.listen(config.APP_PORT, () => {
@@ -31,8 +31,6 @@ function intiGrpcConnection() {
   const server = new grpc.Server();
 
   //   server.addService(customerProto.CustomerService.service, { getAllNews: getAllNews });
-  //   server.addService(heroProto.HeroService.service, { findOne: findOne });
-  // server.addService(customerProto.CustomerService.service, { getAllNews: getAllNews });
 
   server.bindAsync(
     `localhost:${rpc_port}`,

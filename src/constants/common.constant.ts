@@ -1,0 +1,1 @@
+export const OTP_SIGNUP_TTL = '3m'
