@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { CustomerClientService } from './rpc_client_services/rpc-client-customer';
 import { v1 as uuidv1 } from 'uuid';
-import { LoginT1Res, SessionLogin } from '../interfaces/customer-service/auth.interface';
+import { ILoginT1Res, ISessionLogin } from '../interfaces/customer-service/auth.interface';
 import CacheService from './infrastructure/cache.service';
 import { EOtpType, UsrLoginType } from '../enums/auth.enum';
 import { checkPhoneOrEmail } from '../utils';
@@ -97,14 +97,14 @@ export class AuthService {
     return jwt.sign(user, this.refreshTokenSecret, { expiresIn: '7d' });
   }
 
-  async handleLogin(loginRes: any, req: Request): Promise<LoginT1Res> {
+  async handleLoginT1(req: Request, loginRes: any): Promise<ILoginT1Res> {
     const tokens = {
       access_token: this.generateAccessToken(loginRes),
       refresh_token: this.generateAccessToken(loginRes)
     }
     const { device_id, device_info } = req.headers;
     const { usr, password } = req.body;
-    const newSession: SessionLogin = {
+    const newSession: ISessionLogin = {
       id: uuidv1(),
       usr: usr,
       refresh_token: this.generateRefreshToken(loginRes),
@@ -119,6 +119,18 @@ export class AuthService {
     const checkSid = await this.cacheService.get(ckey);
     if (!checkSid)
       await this.cacheService.set(ckey, newSession, 3600);
+    return {
+      access_token: tokens.access_token,
+      refresh_token: tokens.access_token,
+      type: 'Bearer'
+    }
+  }
+
+  async handleSignUpT1(req: Request, signUpRes: any) {
+    const tokens = {
+      access_token: this.generateAccessToken(signUpRes),
+      refresh_token: this.generateAccessToken(signUpRes)
+    }
     return {
       access_token: tokens.access_token,
       refresh_token: tokens.access_token,

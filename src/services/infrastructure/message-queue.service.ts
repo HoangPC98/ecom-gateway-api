@@ -6,14 +6,13 @@ export class RmqPubService {
   private sendSMSQueue = 'QUEUE_SEND_SMS';
   private sendEmailQueue = 'QUEUE_SEND_MAIL';
   private pushNotificationQueue = 'QUEUE_PUSH_NOTIF';
-  private connection!: Connection;
   private channel!: Channel;
   public readonly DIRECT_EXCH = 'direct_exchange';
+  public readonly RK_SMS_01 = 'rk_sms_01'
   // private readonly smsService: SmsServive;
 
   constructor() {
     this.init();
-    // this.smsService = new SmsServive();
   }
 
   async init() {
@@ -30,17 +29,6 @@ export class RmqPubService {
     ])
   }
 
-  async consumeQueueBName(queueName: string) {
-    await this.channel.assertQueue(this.sendSMSQueue, { durable: true });
-    this.channel.consume(this.sendSMSQueue, async (msg) => {
-      if (msg) {
-        console.log(`Consume Msg from Queue: ${this.sendEmailQueue}`, msg?.content.toString())
-        // Acknowledge the processed message
-        this.channel.ack(msg);
-      }
-    })
-  }
-
   async assertQueues(queues: string[]) {
     await Promise.all(queues.map(queue => {
       this.channel.assertQueue(queue, { durable: true })
@@ -50,8 +38,6 @@ export class RmqPubService {
   }
 
   publishSMS(rkey: string, msg: any) {
-    this.channel.assertQueue(this.sendSMSQueue, { durable: true });
-    // this.channel.publish(this.DIRECT_EXCH, rkey,  Buffer.from(JSON.stringify({ msg })))
-    this.channel.sendToQueue(this.sendSMSQueue, Buffer.from(JSON.stringify(msg)))
+    this.channel.publish(this.DIRECT_EXCH, this.RK_SMS_01,  Buffer.from(JSON.stringify(msg)))
   }
 }

@@ -7,7 +7,7 @@ export interface ICustomerAuth {
   role: ECustomerRole;
 }
 
-export interface SessionLogin {
+export interface ISessionLogin {
   id: string;
   usr: string;
   refresh_token: string;
@@ -19,12 +19,22 @@ export interface SessionLogin {
   expried_at: string;
 }
 
-export interface LoginT1Res {
+export interface ILoginT1Req {
+  usr: string;
+  password: string;
+}
+export interface ILoginT1Res {
   access_token: string;
   refresh_token: string;
   type: string;
 }
 
+export interface ISignUpT1Req {
+  usr: string;
+  password: string;
+  otp_id: string;
+  otp_code: string;
+}
 export interface IGetOtpReq {
   usr: string;
   type: EOtpType;

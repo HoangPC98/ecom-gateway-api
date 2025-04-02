@@ -10,28 +10,23 @@ class CacheService {
     })
   }
 
-  async set(key: string, value: any, ttl?: number){
+  async set(key: string, value: any, ttl?: number) {
     try {
       console.log(`Set Redis key: ${key}`);
-      await this.client.set(key,  JSON.stringify(value), 'EX', ttl || 3600);
+      await this.client.set(key, JSON.stringify(value), 'EX', ttl || 3600);
     } catch (error) {
       console.error('Error setting key:', error);
-    } finally {
-      this.client.disconnect();
     }
   }
 
-  async get(key: string){
+  async get(key: string) {
     try {
       const result = await this.client.get(key);
       console.log(`Get Redis key: ${key}`);
       return result;
     } catch (error) {
       console.error('Error getting key:', error);
-    } finally {
-      this.client.disconnect();
     }
-    
   }
 
   async del(key: string): Promise<void> {
@@ -40,10 +35,8 @@ class CacheService {
       console.log(`Deleted ${result} key(s).`);
     } catch (error) {
       console.error('Error deleting key:', error);
-    } finally {
-      this.client.disconnect(); // close the connection
     }
   }
 }
 
-export default  CacheService;
+export default CacheService;

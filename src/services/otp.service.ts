@@ -62,12 +62,11 @@ export class OtpService {
       const otpValue: TOtpDto = {
         id: uuidv1(),
         value: otpCode,
-        key: phoneOrEmail,
+        to_number: phoneOrEmail,
         type: type,
         expried_in: OTP_SIGNUP_TTL,
       };
       await this.cacheService.set(ckey, otpValue);
-      const otp = await this.cacheService.get(ckey) as unknown as TOtpDto;
       return otpValue;
     }
   }
