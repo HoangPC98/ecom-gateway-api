@@ -1,5 +1,6 @@
-import { ErrorRequestHandler } from "express";
+import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils";
+import HttpException from "src/exceptions/common.exception";
 
 export const errorConverter: ErrorRequestHandler = (err, req, res, next) => {
   let error = err;
@@ -12,7 +13,7 @@ export const errorConverter: ErrorRequestHandler = (err, req, res, next) => {
     const message =
       error.message ||
       (statusCode === 400 ? "Bad Request" : "Internal Server Error");
-    error = new ApiError(statusCode, message, false, err.stack.toString());
+    error = new ApiError(statusCode, message, false);
   }
   next(error);
 };
@@ -39,3 +40,14 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   res.status(statusCode).json(response);
   next();
 };
+
+export const grpcToHttpErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+  const status = err.code
+  const message = err.details || 'Unknown Error';
+  const response = {
+    code: status,
+    message,
+    ...(process.env.NODE_ENV == 'develop' && { stack: err.stack }),
+  };
+  res.status(status).json(response)
+}

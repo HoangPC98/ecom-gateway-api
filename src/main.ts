@@ -1,11 +1,12 @@
 import express, { Express } from "express";
 import { Server } from "http";
 import { authRoute } from "./routes/authRoutes";
-import { errorConverter, errorHandler } from "./middleware/exception.middleware";
+import { errorConverter, errorHandler, grpcToHttpErrorHandler } from "./middleware/exception.middleware";
 import config from "./config/app.config";
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import path from "path";
+import { verifyToken } from "./middleware/auth.middlewate";
 
 let server: Server;
 const restServer: Express = express();
@@ -14,8 +15,7 @@ function startServer() {
   restServer.use(express.json());
   restServer.use(express.urlencoded({ extended: true }));
   restServer.use(authRoute);
-  restServer.use(errorConverter);
-  restServer.use(errorHandler);
+  restServer.use(grpcToHttpErrorHandler);
   server = restServer.listen(config.APP_PORT, () => {
     console.log(`--> Server is running on port ${config.APP_PORT}`);
   });

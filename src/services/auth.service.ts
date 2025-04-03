@@ -10,6 +10,7 @@ import { checkPhoneOrEmail } from '../utils';
 import { TOtpDto } from '../interfaces/types/auth.type';
 import { RmqPubService } from './infrastructure/message-queue.service';
 import { OtpService } from './otp.service';
+import { Customer } from 'src/interfaces/customer-service/customer/customer';
 interface User {
   id: number;
   username: string;
@@ -34,7 +35,7 @@ export class AuthService {
   protected rmqPubService: RmqPubService;
   protected otpService: OtpService;
   public customerClientService: CustomerClientService;
-  
+
   constructor() {
     this.accessTokenSecret = process.env.JWT_ATOKEN || 'access';
     this.refreshTokenSecret = process.env.JWT_RTOKEN || 'refresh';
@@ -97,31 +98,32 @@ export class AuthService {
     return jwt.sign(user, this.refreshTokenSecret, { expiresIn: '7d' });
   }
 
-  async handleLoginT1(req: Request, loginRes: any): Promise<ILoginT1Res> {
+  async handleLoginT1(req: Request, loginRes: Customer.LoginT1Res): Promise<ILoginT1Res> {
+    const tokenPayload = { id: loginRes.uid || 0, role: loginRes.role || 'user' };
     const tokens = {
-      access_token: this.generateAccessToken(loginRes),
-      refresh_token: this.generateAccessToken(loginRes)
+      access_token: this.generateAccessToken(tokenPayload),
+      refresh_token: this.generateRefreshToken(tokenPayload)
     }
     const { device_id, device_info } = req.headers;
     const { usr, password } = req.body;
     const newSession: ISessionLogin = {
       id: uuidv1(),
       usr: usr,
-      refresh_token: this.generateRefreshToken(loginRes),
-      fcm_token: loginRes.fcm_token || null,
+      refresh_token: this.generateRefreshToken(tokenPayload),
+      fcm_token: loginRes.fcmToken || '',
       device_id: device_id ? String(device_id) : '',
       device_info: device_info ? String(device_info) : '',
       ip_address: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
       last_login_at: new Date().toISOString(),
       expried_at: ''
     }
-    const ckey = `usr:${usr}_sid:${newSession.device_id}`
-    const checkSid = await this.cacheService.get(ckey);
-    if (!checkSid)
+    const ckey = `sid_usr:${usr}`
+    const sid_usr = await this.cacheService.get(ckey);
+    if (!sid_usr)
       await this.cacheService.set(ckey, newSession, 3600);
     return {
       access_token: tokens.access_token,
-      refresh_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
       type: 'Bearer'
     }
   }
@@ -133,7 +135,7 @@ export class AuthService {
     }
     return {
       access_token: tokens.access_token,
-      refresh_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
       type: 'Bearer'
     }
   }
@@ -142,24 +144,17 @@ export class AuthService {
     const userType = checkPhoneOrEmail(usr);
     let otpSend: TOtpDto;
 
-    // this.channel.sendToQueue(
-    //   'MESSSAGE_SERVICE_QUEUE',
-    //   Buffer.from(JSON.stringify({ msg })),
-    //   {
-    //     persistent: true  // make sure msg won't be lost even RMQ restart (RMQ will save msg to disk in advanced)
-    //   }
-    // );
     if (userType == UsrLoginType.EMAIL) {
       return await this.sendOtpByEmail(usr, type);
-    } else if(userType == UsrLoginType.PHONE) {
+    } else if (userType == UsrLoginType.PHONE) {
       otpSend = await this.sendOtpBySms(usr, type);
       return otpSend;
     }
     else
-     return 1;
+      return 1;
   }
 
-  async sendOtpByEmail(email: string, type: EOtpType) {}
+  async sendOtpByEmail(email: string, type: EOtpType) { }
 
   async sendOtpBySms(phoneNumber: string, type: EOtpType): Promise<TOtpDto> {
     const otpSend = await this.otpService.generateOtpCode(phoneNumber, type);
@@ -169,5 +164,27 @@ export class AuthService {
       expried_in: otpSend.expried_in,
       value: otpSend.value,
     };
+  }
+
+  handleLogout(token: string) {
+    try {
+      const user = this.validateAccessToken(token);
+      // this.cacheService.del(`sid_usr:${user.id}`)
+    }
+    catch (err) {
+
+    }
+  }
+
+  validateAccessToken(atoken: string) {
+    try {
+      console.log('Token', atoken)
+      const result = jwt.verify(atoken, String(this.accessTokenSecret));
+      console.log('REsult...', result)
+      return result;
+    } catch (error) {
+      console.log(error)
+    }
+
   }
 }

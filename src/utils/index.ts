@@ -9,7 +9,7 @@ export class ApiError extends Error {
     statusCode: number,
     message: string | undefined,
     isOperational = true,
-    stack = ""
+    stack = ''
   ) {
     super(message);
     this.statusCode = statusCode;

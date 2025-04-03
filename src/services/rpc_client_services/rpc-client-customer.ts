@@ -29,10 +29,10 @@ export class CustomerClientService extends RpcRequestServiceAbstract {
 
   clientRequest<T>(call: IGrpcClientRequest, callback: GRPC.sendUnaryData<T>) {
     console.log('--> ClientRequest', call)
-    this.serviceClientCall[call.method]({ ...call.message}, (err: any, response: any) => {
-      console.log('--> Response', response, err)
+    this.serviceClientCall[call.method]({ ...call.message}, (err: any, response: T) => {
+      // console.log('--> Response', response, err)
       if (err) {
-        console.log('Error', err);
+        console.error(`--> An Error Occur: \n [Code]: ${err.code}  \n [Detail]: ${err.details}`);
         callback(err);
       }
       else {
