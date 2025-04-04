@@ -4,7 +4,7 @@ class CacheService {
   protected client: Redis;
   constructor() {
     this.client = new Redis({
-      port: 6380,
+      port: Number(process.env.REDIS_PORT) || 6379,
       host: '127.0.0.1',
       db: 0
     })

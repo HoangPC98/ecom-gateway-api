@@ -5,6 +5,7 @@ export class HttpException extends Error {
     super(message)
     this.status = errCode
     this.message = message || 'Unknown Error';
+    console.log(`HttpException: code: ${errCode}, message: ${message}`);
   }
 }
 

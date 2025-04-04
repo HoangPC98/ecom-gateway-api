@@ -28,6 +28,7 @@ export namespace Customer {
     export interface LoginT1Res {
         status?: number;
         uid?: number;
+        usr?: string;
         type?: string;
         role?: string;
         fcmToken?: string;

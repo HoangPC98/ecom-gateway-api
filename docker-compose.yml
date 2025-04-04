@@ -1,0 +1,38 @@
+services:
+  redis_gateway:
+    image: redis:latest
+    container_name: redis_gateway
+    restart: always
+    command: redis-server --port 6379
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
+    volumes:
+      - redis:/data
+    # networks:
+    #   - ecom_common
+    network_mode: host
+  
+  gateway_api:
+    container_name: gateway_api
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis_gateway
+    volumes:
+      - .:/app/client_api
+    # networks:
+    #   - ecom_common
+    network_mode: host
+volumes:
+  redis:
+    external: true
+  app:
+    external: true

@@ -12,7 +12,9 @@ export class CustomerClientService extends RpcRequestServiceAbstract {
     super();
     // Define the path to the proto file
     this.serviceHost = '0.0.0.0:5001';
-    this.serviceProtoPath = path.join(process.cwd(), '../ecom-protos-grpc/customer/customer.proto');
+    this.serviceProtoPath = process.env.APP_ENV == 'local' 
+    ? path.join(process.cwd(), '../ecom-protos-grpc/customer/customer.proto') 
+    : path.join(process.cwd(), './proto/customer/customer.proto');
     // Load the proto file
     const customerPackageDefinition = ProtoLoader.loadSync(this.serviceProtoPath);
     const customerProto = GRPC.loadPackageDefinition(customerPackageDefinition).Customer as any;
@@ -30,7 +32,7 @@ export class CustomerClientService extends RpcRequestServiceAbstract {
   clientRequest<T>(call: IGrpcClientRequest, callback: GRPC.sendUnaryData<T>) {
     console.log('--> ClientRequest', call)
     this.serviceClientCall[call.method]({ ...call.message}, (err: any, response: T) => {
-      // console.log('--> Response', response, err)
+      console.log('--> Response', response, err)
       if (err) {
         console.error(`--> An Error Occur: \n [Code]: ${err.code}  \n [Detail]: ${err.details}`);
         callback(err);

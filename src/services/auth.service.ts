@@ -11,6 +11,7 @@ import { TOtpDto } from '../interfaces/types/auth.type';
 import { RmqPubService } from './infrastructure/message-queue.service';
 import { OtpService } from './otp.service';
 import { Customer } from 'src/interfaces/customer-service/customer/customer';
+import HttpException from '../exceptions/common.exception';
 interface User {
   id: number;
   username: string;
@@ -20,6 +21,7 @@ interface User {
 
 interface UserPayload {
   id: number;
+  usr: string;
   role: string;
 }
 
@@ -99,7 +101,7 @@ export class AuthService {
   }
 
   async handleLoginT1(req: Request, loginRes: Customer.LoginT1Res): Promise<ILoginT1Res> {
-    const tokenPayload = { id: loginRes.uid || 0, role: loginRes.role || 'user' };
+    const tokenPayload = { id: loginRes.uid || 0, usr: loginRes.usr || '', role: loginRes.role || 'user' };
     const tokens = {
       access_token: this.generateAccessToken(tokenPayload),
       refresh_token: this.generateRefreshToken(tokenPayload)
@@ -166,24 +168,26 @@ export class AuthService {
     };
   }
 
-  handleLogout(token: string) {
+  async handleLogout(token: string) {
     try {
       const user = this.validateAccessToken(token);
-      // this.cacheService.del(`sid_usr:${user.id}`)
+      const sid = await this.cacheService.get(`sid_usr:${user.usr}`);
+      if (!sid) throw new HttpException(401, 'Token is invalid');
+      this.cacheService.del(`sid_usr:${user.usr}`);
     }
     catch (err) {
-
+      throw new HttpException(401, 'Token is invalid');
     }
   }
 
-  validateAccessToken(atoken: string) {
+  validateAccessToken(atoken: string): UserPayload {
     try {
       console.log('Token', atoken)
       const result = jwt.verify(atoken, String(this.accessTokenSecret));
       console.log('REsult...', result)
-      return result;
+      return result as UserPayload;
     } catch (error) {
-      console.log(error)
+      throw new HttpException(401, 'Token is invalid');
     }
 
   }
