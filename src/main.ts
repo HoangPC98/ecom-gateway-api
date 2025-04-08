@@ -1,52 +1,39 @@
-import express, { Express } from "express";
 import { Server } from "http";
+import express, { Express, NextFunction, Request, Response } from "express";
 import { authRoute } from "./routes/authRoutes";
-import { errorConverter, errorHandler, grpcToHttpErrorHandler } from "./middleware/exception.middleware";
+import { grpcToHttpErrorHandler } from "./middleware/exception.middleware";
 import config from "./config/app.config";
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
-import path from "path";
-import { verifyToken } from "./middleware/auth.middlewate";
+import { authTokenMiddleware, publicRoutes } from "./middleware/auth.middlewate";
+import { rateLimit } from 'express-rate-limit';
+import { rateLimiter } from "./config/rate-limit.config";
 
 let server: Server;
-const restServer: Express = express();
+const app: Express = express();
 
 function startServer() {
-  restServer.use(express.json());
-  restServer.use(express.urlencoded({ extended: true }));
-  restServer.use(authRoute);
-  restServer.use(grpcToHttpErrorHandler);
-  server = restServer.listen(config.APP_PORT, () => {
-    console.log(`--> Server is running on port ${config.APP_PORT}`);
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(grpcToHttpErrorHandler);
+
+  
+  
+  app.use(rateLimiter);
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (publicRoutes.includes(req.path)) {
+      return next();
+    }
+    else authTokenMiddleware(req, res, next);
+  });
+  
+  app.use(authRoute);
+
+  server = app.listen(config.APP_PORT, () => {
+    console.log(`--> Http Server is running on port ${config.APP_PORT}`);
   });
 }
 
-
-function intiGrpcConnection() {
-  const rpc_port = 50050;
-  const packageDefinitionCustomer = protoLoader.loadSync(path.join(__dirname, '../../ecom-protos-grpc/customer/customer.proto'));
-  const packageDefinitionHero = protoLoader.loadSync(path.join(__dirname, '../../ecom-protos-grpc/customer/hero.proto'));
-  const customerProto = grpc.loadPackageDefinition(packageDefinitionCustomer).Customer as any;
-  const heroProto = grpc.loadPackageDefinition(packageDefinitionHero).hero as any;
-  const server = new grpc.Server();
-
-  //   server.addService(customerProto.CustomerService.service, { getAllNews: getAllNews });
-
-  server.bindAsync(
-    `localhost:${rpc_port}`,
-    grpc.ServerCredentials.createInsecure(),
-    (err, port) => {
-      if (err != null) {
-        return console.error(`Error start application: ${err}`);
-      }
-      console.warn(`Microservice customers gRPC listening on ${port}`);
-    },
-  );
-};
-
 const bootstrap = async () => {
   startServer();
-  // intiGrpcConnection();
 }
 
 bootstrap();

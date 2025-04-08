@@ -28,10 +28,6 @@ interface UserPayload {
 export class AuthService {
   private accessTokenSecret: string;
   private refreshTokenSecret: string;
-  private users: User[] = [
-    { id: 1, username: 'admin', password: bcrypt.hashSync('admin', 10), role: 'admin' },
-    { id: 2, username: 'user', password: bcrypt.hashSync('user', 10), role: 'user' },
-  ];
 
   protected cacheService: CacheService;
   protected rmqPubService: RmqPubService;
@@ -39,57 +35,12 @@ export class AuthService {
   public customerClientService: CustomerClientService;
 
   constructor() {
-    this.accessTokenSecret = process.env.JWT_ATOKEN || 'access';
-    this.refreshTokenSecret = process.env.JWT_RTOKEN || 'refresh';
+    this.accessTokenSecret = process.env.JWT_ATOKEN_SECRET || 'access';
+    this.refreshTokenSecret = process.env.JWT_RTOKEN_SECRET || 'refresh';
     this.customerClientService = new CustomerClientService();
     this.cacheService = new CacheService();
     this.rmqPubService = new RmqPubService();
     this.otpService = new OtpService();
-  }
-
-  public signUp(req: Request, res: Response) {
-    const { username, password, role } = req.body;
-    console.log('thisUsers', this.users);
-    const userExists = this.users.find(user => user.username === username);
-    if (userExists) {
-      res.status(400).send('User already exists');
-      return;
-    }
-
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    const newUser: User = { id: this.users.length + 1, username, password: hashedPassword, role };
-    return res.status(201).send('User created successfully');
-  }
-
-  login(req: Request, res: Response) {
-    const { username, password } = req.body;
-    console.log('this.customerClientService', this);
-    console.log('thisaccessTokenSecret', this.accessTokenSecret);
-    const listUser = [
-      { id: 1, username: 'admin', password: bcrypt.hashSync('admin', 10), role: 'admin' },
-      { id: 2, username: 'user', password: bcrypt.hashSync('user', 10), role: 'user' },
-    ];
-
-    this.customerClientService.clientRequest({ method: 'login', message: { usr: 'hoangpc', password: '123' } }, (err: any, data: any) => {
-      console.log('GET clientRequest', data, err)
-      if (err) {
-        console.log('Error', err);
-      }
-      res.json({ users: data });
-    });
-  }
-
-  public resetPassword(req: Request, res: Response): void {
-    const { username, newPassword } = req.body;
-    const user = this.users.find(user => user.username === username);
-    if (!user) {
-      res.status(400).send('User not found');
-      return;
-    }
-
-    const hashedPassword = bcrypt.hashSync(newPassword, 10);
-    user.password = hashedPassword;
-    res.send('Password reset successfully');
   }
 
   public generateAccessToken(user: UserPayload): string {

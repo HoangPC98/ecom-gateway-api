@@ -1,9 +1,9 @@
 import { config } from "dotenv";
-
 const configFile = `./.env`;
 config({ path: configFile });
 
 const { MONGO_URI, PORT, JWT_SECRET, NODE_ENV, RABBITMQ_URI } = process.env;
+
 export const rabbitmqUri = (): string => {
     const user = process.env.RABBITMQ_DEFAULT_USER;
     const pass = process.env.RABBITMQ_DEFAULT_PASS;
