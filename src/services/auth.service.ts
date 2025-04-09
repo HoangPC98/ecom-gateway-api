@@ -1,5 +1,4 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
+import { Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { CustomerClientService } from './rpc_client_services/rpc-client-customer';
 import { v1 as uuidv1 } from 'uuid';
@@ -12,6 +11,8 @@ import { RmqPubService } from './infrastructure/message-queue.service';
 import { OtpService } from './otp.service';
 import { Customer } from 'src/interfaces/customer-service/customer/customer';
 import HttpException from '../exceptions/common.exception';
+import logger from "src/utils/logger";
+
 interface User {
   id: number;
   username: string;
@@ -133,9 +134,9 @@ export class AuthService {
 
   validateAccessToken(atoken: string): UserPayload {
     try {
-      console.log('Token', atoken)
+      logger.info('Token', atoken)
       const result = jwt.verify(atoken, String(this.accessTokenSecret));
-      console.log('REsult...', result)
+      logger.info('REsult...', result)
       return result as UserPayload;
     } catch (error) {
       throw new HttpException(401, 'Token is invalid');

@@ -3,7 +3,8 @@ import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcRequestServiceAbstract } from './rpc-client-abstract';
 import { IGrpcClientRequest } from 'src/interfaces/grpc-client.interface';
-import { request } from 'http';
+import logger from "src/utils/logger";
+
 
 export class CustomerClientService extends RpcRequestServiceAbstract {
   public authServiceCall: any;
@@ -30,9 +31,9 @@ export class CustomerClientService extends RpcRequestServiceAbstract {
   }
 
   clientRequest<T>(call: IGrpcClientRequest, callback: GRPC.sendUnaryData<T>) {
-    console.log('--> ClientRequest', call)
+    logger.info('--> ClientRequest', call)
     this.serviceClientCall[call.method]({ ...call.message}, (err: any, response: T) => {
-      console.log('--> Response', response, err)
+      logger.info('--> Response', response, err)
       if (err) {
         console.error(`--> An Error Occur: \n [Code]: ${err.code}  \n [Detail]: ${err.details}`);
         callback(err);

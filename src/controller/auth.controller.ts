@@ -4,6 +4,7 @@ import { ICustomerAuth, ISessionLogin, IGetOtpReq, ILoginT1Res, ILoginT1Req, ISi
 import { AuthService } from '../services/auth.service';
 import HttpException from '../exceptions/common.exception';
 import { Customer } from 'src/interfaces/customer-service/customer/customer';
+import logger from "src/utils/logger";
 
 const customerClientService = new CustomerClientService();
 const authService = new AuthService();
@@ -16,7 +17,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         next(err);
       }
       else if (data) {
-        console.log('Data...', data);
+        logger.info('Data...', data);
         try {
           if (data.status == 200) {
             const tokens = await authService.handleLoginT1(req, data)
@@ -33,7 +34,7 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
   customerClientService.clientRequest(
     { method: 'signUp', message: req.body as Customer.SignUpT1Req },
     async (err: any, data: any) => {
-      console.log('SignUp Request...', data, err)
+      logger.info('SignUp Request...', data, err)
       if (err) {
         next(err)
       }

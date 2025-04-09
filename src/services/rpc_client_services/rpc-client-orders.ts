@@ -22,11 +22,11 @@ export class OrdersClientService extends RpcRequestServiceAbstract {
   }
 
   clientRequest(call: IGrpcClientRequest, callback: any) {
-    console.log('--> RPC OrderRequest..', call)
+    logger.info('--> RPC OrderRequest..', call)
     this.serviceClientCall[call.method]({ ...call.message}, (err: any, response: any) => {
-      console.log('--> RPC OrderResponse..', response, err)
+      logger.info('--> RPC OrderResponse..', response, err)
       if (err) {
-        console.log('Error', err);
+        logger.info('Error', err);
         callback(err);
       }
       else {
