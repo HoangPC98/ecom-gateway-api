@@ -9,3 +9,8 @@ export type TOtpDto = {
   expried_in?: string;
 };
 
+export type RpcError = {
+  code: number;
+  details: string;
+};
+     

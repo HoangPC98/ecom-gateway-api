@@ -1,6 +1,6 @@
-import client, { Connection, Channel, ConsumeMessage } from "amqplib";
-// import { SmsServive } from "./sms/send-sms.service";
-import { rabbitmqUri } from "../../config/app.config";
+import client, { Channel } from "amqplib";
+import { rabbitmqUri } from "src/config/app.config";
+import logger from "src/utils/logger";
 
 export class RmqPubService {
   private sendSMSQueue = 'QUEUE_SEND_SMS';
@@ -33,7 +33,7 @@ export class RmqPubService {
     await Promise.all(queues.map(queue => {
       this.channel.assertQueue(queue, { durable: true })
     }))
-    console.log(`--> Assert Queue... \n + ${queues.join('\n + ')}`)
+    logger.info(`--> Assert Queue... \n + ${queues.join('\n + ')}`)
 
   }
 

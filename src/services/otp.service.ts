@@ -1,9 +1,9 @@
-import { ErrorMessage } from "../enums/error.enum";
+import { ErrorMessage } from "src/enums/error.enum";
 import * as otpGenerator from 'otp-generator';
-import { TOtpDto } from "../interfaces/types/auth.type";
-import { EOtpType } from "../enums/auth.enum";
+import { TOtpDto } from "src/interfaces/types/auth.type";
+import { EOtpType } from "src/enums/auth.enum";
 import { v1 as uuidv1 } from 'uuid';
-import { OTP_SIGNUP_TTL } from "../constants/common.constant";
+import { OTP_SIGNUP_TTL } from "src/constants/common.constant";
 import CacheService from "./infrastructure/cache.service";
 
 export class OtpService {

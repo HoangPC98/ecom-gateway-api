@@ -4,9 +4,8 @@ import { authRoute } from "./routes/authRoutes";
 import { grpcToHttpErrorHandler } from "./middleware/exception.middleware";
 import config from "./config/app.config";
 import { authTokenMiddleware, publicRoutes } from "./middleware/auth.middlewate";
-import { rateLimit } from 'express-rate-limit';
 import { rateLimiter } from "./config/rate-limit.config";
-
+import logger from "src/utils/logger";
 let server: Server;
 const app: Express = express();
 
@@ -15,8 +14,6 @@ function startServer() {
   app.use(express.urlencoded({ extended: true }));
   app.use(grpcToHttpErrorHandler);
 
-  
-  
   app.use(rateLimiter);
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (publicRoutes.includes(req.path)) {
@@ -28,7 +25,7 @@ function startServer() {
   app.use(authRoute);
 
   server = app.listen(config.APP_PORT, () => {
-    console.log(`--> Http Server is running on port ${config.APP_PORT}`);
+    logger.info(`--> Http Server is running on port ${config.APP_PORT}`);
   });
 }
 

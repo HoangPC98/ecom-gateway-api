@@ -4,6 +4,9 @@ import { ICustomerAuth, ISessionLogin, IGetOtpReq, ILoginT1Res, ILoginT1Req, ISi
 import { AuthService } from '../services/auth.service';
 import HttpException from '../exceptions/common.exception';
 import { Customer } from 'src/interfaces/customer-service/customer/customer';
+import logger from "src/utils/logger";
+import { RpcError } from 'src/interfaces/types/auth.type';
+import { thowHttpException } from 'src/exceptions/throw-exeption';
 
 const customerClientService = new CustomerClientService();
 const authService = new AuthService();
@@ -11,19 +14,19 @@ const authService = new AuthService();
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   customerClientService.clientRequest(
     { method: 'login', message: req.body as Customer.LoginT1Req },
-    async (err: any, data: any) => {
+    async (err: RpcError, data: any) => {
       if (err) {
-        next(err);
+        return res.status(err.code).json({ message: err.details });
       }
       else if (data) {
-        console.log('Data...', data);
+        logger.info('Data...', data);
         try {
           if (data.status == 200) {
             const tokens = await authService.handleLoginT1(req, data)
             return res.status(201).json({ data: tokens });
           }
         } catch (error) {
-          throw new HttpException(err.code, err.detail)
+          return res.status(400).json({ message: "Bad request" });
         }
       }
     });
@@ -32,17 +35,18 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
   customerClientService.clientRequest(
     { method: 'signUp', message: req.body as Customer.SignUpT1Req },
-    async (err: any, data: any) => {
-      console.log('SignUp Request...', data, err)
+    async (err: RpcError, data: any) => {
+      logger.info('SignUp Request...', data, err)
       if (err) {
-        next(err)
+        return thowHttpException(err, res)
       }
       else if (data) {
         try {
           const tokens = await authService.handleSignUpT1(req, data)
           return res.status(201).json({ data: tokens });
         } catch (error) {
-          throw new HttpException(err.code, err.detail)
+        return thowHttpException(err, res)
+
         }
       }
     }
