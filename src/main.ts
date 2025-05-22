@@ -1,6 +1,6 @@
 import { Server } from "http";
 import express, { Express, NextFunction, Request, Response } from "express";
-import { authRoute } from "./routes/authRoutes";
+import { authRoute } from "./routes/authRoute";
 import { grpcToHttpErrorHandler } from "./middleware/exception.middleware";
 import config from "./config/app.config";
 import { authTokenMiddleware, publicRoutes } from "./middleware/auth.middlewate";

@@ -40,6 +40,6 @@ const authTokenMiddleware = (req: AuthenticatedRequest, res: Response, next: Nex
   }
 };
 
-const publicRoutes = ['/login', '/register'];
+const publicRoutes = ['/login', '/sign-up', '/get-otp', '/verify-otp',];
 
 export {publicRoutes, generateTokens, verifyToken, authTokenMiddleware };

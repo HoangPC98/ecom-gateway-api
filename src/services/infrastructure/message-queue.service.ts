@@ -24,7 +24,7 @@ export class RmqPubService {
     });
     this.assertQueues([
       this.sendSMSQueue,
-      this.sendEmailQueue,
+      // this.sendEmailQueue,
       this.pushNotificationQueue
     ])
   }
