@@ -1,10 +1,10 @@
 import { Router } from "express";
-import * as authController from "../controller/auth.controller";
+import * as messagingController from "../controller/messaging.controller";
 import { authTokenMiddleware } from "src/middleware/auth.middlewate";
 
-const authRoute = Router();
-authRoute.post('/get-user-online', authController.login);
-authRoute.post('/get-message-chatbox', authController.signUp);
-authRoute.post('/send-message', authController.getOtp);
-authRoute.get('/', authController.logOut)
-export { authRoute };
+const messagingRoute = Router();
+// authRoute.post('/get-user-online', messagingController.login);
+// authRoute.post('/get-message-chatbox', messagingController.signUp);
+// authRoute.post('/send-message', messagingController.getOtp);
+messagingRoute.get('/messaging/chat/connect', messagingController.initializeSocketConnection)
+export { messagingRoute };

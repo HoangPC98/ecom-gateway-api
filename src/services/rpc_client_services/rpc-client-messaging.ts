@@ -10,7 +10,7 @@ export class MessagingClientService extends RpcRequestServiceAbstract {
   constructor() {
     super();
     // Define the path to the proto file
-    this.serviceHost = process.env.messaging_RPC_HOST || '0.0.0.0:9001';
+    this.serviceHost = '0.0.0.0:9001';
     this.serviceProtoPath = path.join(process.cwd(), '../ecom-protos-grpc/messaging/messaging.proto');
 
     // Load the proto file
@@ -18,7 +18,7 @@ export class MessagingClientService extends RpcRequestServiceAbstract {
     const messagingProto = GRPC.loadPackageDefinition(messagingPackageDefinition).Messaging as any;
 
     // Create the service stub
-    this.serviceClientCall = new messagingProto.messagingService(this.serviceHost, GRPC.credentials.createInsecure());
+    this.serviceClientCall = new messagingProto.MessagingService(this.serviceHost, GRPC.credentials.createInsecure());
   }
 
   clientRequest(call: IGrpcClientRequest, callback: any) {
