@@ -28,7 +28,7 @@ const verifyToken = (token: string, type: 'access' | 'refresh' = 'access'): ICus
 const authTokenMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
   if (!token) {
-    return res.status(401).json({ message: 'Authentication token is required' });
+    return res.status(401).json({ message: 'Authentication token is required.....' });
   }
   try {
     // Verify the token
@@ -40,6 +40,6 @@ const authTokenMiddleware = (req: AuthenticatedRequest, res: Response, next: Nex
   }
 };
 
-const publicRoutes = ['/login', '/sign-up', '/get-otp', '/verify-otp',];
+const publicRoutes = ['/auth/login', '/auth/sign-up', '/auth/get-otp', '/auth/verify-otp',];
 
 export {publicRoutes, generateTokens, verifyToken, authTokenMiddleware };

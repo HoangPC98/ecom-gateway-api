@@ -3,8 +3,8 @@ import * as authController from "../controller/auth.controller";
 import { authTokenMiddleware } from "src/middleware/auth.middlewate";
 
 const authRoute = Router();
-authRoute.post("/login", authController.login);
-authRoute.post('/sign-up', authController.signUp);
-authRoute.post('/get-otp', authController.getOtp);
-authRoute.get('/logout', authController.logOut)
+authRoute.post("/auth/login", authController.login);
+authRoute.post('/auth/sign-up', authController.signUp);
+authRoute.post('/auth/get-otp', authController.getOtp);
+authRoute.get('/auth/logout', authController.logOut)
 export { authRoute };
